@@ -1,0 +1,25 @@
+﻿Example queries:
+
+var query = from post in Delicious("username", "password")
+			where post.Tags.Contains("tag")
+			select post
+			
+var query = from post in Delicious("username", "password")
+			where post.Date == new DateTime(2008, 1, 1)
+			select post
+			
+var query = from post in Delicious("username", "password")
+			where post.Date >= new DateTime(2008, 1, 1)
+			select post
+			
+var query = from post in Delicious("username", "password")
+			where post.Date >= new DateTime(2008, 1, 1) &&
+				  post.Date < new DateTime(2009, 1, 1)
+			select post
+
+var query = from post in Delicious("username", "password")
+			where post.Tags.Contains("tag")
+			skip 50
+			take 20
+			select post
+
