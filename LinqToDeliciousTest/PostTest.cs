@@ -86,5 +86,81 @@ namespace LinqToDeliciousTest
             Assert.AreEqual(extended, post.Extended);
             Assert.AreEqual(meta, post.Meta);
         }
+
+        [TestMethod]
+        public void Equal()
+        {
+            String address = "http://example.com/";
+            String hash = "a5a6f3d28d8dd549f3cad39fb0b34104";
+            String description = "Example web page";
+            String tags = "example testing domain test";
+            String date = "2008-12-12T07:45:52Z";
+            String extended = "These domain names are reserved for use in documentation and are not available for registration. See RFC 2606, Section 3.";
+            String meta = "fa2a46d239ad4f089c3ce7961d958b2e";
+
+            Post post1 = new Post(address, hash, description, tags, extended, date, meta);
+            Post post2 = new Post(address, hash, description, tags, extended, date, meta);
+
+            Assert.AreEqual(post1, post2);
+        }
+
+        [TestMethod]
+        public void NotEqual()
+        {
+            String address = "http://example.com/";
+            String hash = "a5a6f3d28d8dd549f3cad39fb0b34104";
+            String description = "Example web page";
+            String tags = "example testing domain test";
+            String date = "2008-12-12T07:45:52Z";
+            String extended = "These domain names are reserved for use in documentation and are not available for registration. See RFC 2606, Section 3.";
+            String meta = "fa2a46d239ad4f089c3ce7961d958b2e";
+
+            Post post1 = new Post(address, hash, description, tags, extended, date, meta);
+            Post post2 = new Post("address", hash, description, tags, extended, date, meta);
+            Post post3 = new Post(address, "hash", description, tags, extended, date, meta);
+            Post post4 = new Post(address, hash, "description", tags, extended, date, meta);
+            Post post5 = new Post(address, hash, description, "tags", extended, date, meta);
+            Post post6 = new Post(address, hash, description, tags, "extended", date, meta);
+            Post post7 = new Post(address, hash, description, tags, extended, "1999-10-10T01:01:01Z", meta);
+            Post post8 = new Post(address, hash, description, tags, extended, date, "meta");
+
+            Assert.AreNotEqual(post1, post2);
+            Assert.AreNotEqual(post1, post3);
+            Assert.AreNotEqual(post1, post4);
+            Assert.AreNotEqual(post1, post5);
+            Assert.AreNotEqual(post1, post6);
+            Assert.AreNotEqual(post1, post7);
+            Assert.AreNotEqual(post1, post8);
+        }
+
+        [TestMethod]
+        public void HashCode()
+        {
+            String address = "http://example.com/";
+            String hash = "a5a6f3d28d8dd549f3cad39fb0b34104";
+            String description = "Example web page";
+            String tags = "example testing domain test";
+            String date = "2008-12-12T07:45:52Z";
+            String extended = "These domain names are reserved for use in documentation and are not available for registration. See RFC 2606, Section 3.";
+            String meta = "fa2a46d239ad4f089c3ce7961d958b2e";
+
+            Post post1 = new Post(address, hash, description, tags, extended, date, meta);
+            Post post2 = new Post(address, hash, description, tags, extended, date, meta);
+            Post post3 = new Post("address", hash, description, tags, extended, date, meta);
+            Post post4 = new Post(address, "hash", description, tags, extended, date, meta);
+            Post post5 = new Post(address, hash, "description", tags, extended, date, meta);
+            Post post6 = new Post(address, hash, description, "tags", extended, date, meta);
+            Post post7 = new Post(address, hash, description, tags, "extended", date, meta);
+            Post post8 = new Post(address, hash, description, tags, extended, "1999-10-10T01:01:01Z", meta);
+            Post post9 = new Post(address, hash, description, tags, extended, date, "meta");
+
+            Assert.AreEqual(post1.GetHashCode(), post2.GetHashCode());
+            Assert.AreNotEqual(post1.GetHashCode(), post3.GetHashCode());
+            Assert.AreNotEqual(post1.GetHashCode(), post4.GetHashCode());
+            Assert.AreNotEqual(post1.GetHashCode(), post5.GetHashCode());
+            Assert.AreNotEqual(post1.GetHashCode(), post6.GetHashCode());
+            Assert.AreNotEqual(post1.GetHashCode(), post7.GetHashCode());
+            Assert.AreNotEqual(post1.GetHashCode(), post8.GetHashCode());
+        }
     }
 }

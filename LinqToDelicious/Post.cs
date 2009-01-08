@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace LinqToDelicious
 {
@@ -48,7 +49,7 @@ namespace LinqToDelicious
                 return false;
             }
 
-            if (post == obj)
+            if (post == this)
             {
                 return true;
             }
@@ -60,7 +61,17 @@ namespace LinqToDelicious
                 Extended.Equals(post.Extended) &&
                 Date.Equals(post.Date) &&
                 Meta.Equals(post.Meta);
+        }
 
+        public override int GetHashCode()
+        {
+            return Address.GetHashCode() ^
+                Hash.GetHashCode() ^
+                Description.GetHashCode() ^
+                string.Join(" ", Tags.ToArray()).GetHashCode() ^
+                Extended.GetHashCode() ^
+                Date.GetHashCode() ^
+                Meta.GetHashCode();
         }
     }
 }
