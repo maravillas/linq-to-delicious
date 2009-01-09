@@ -104,7 +104,7 @@ namespace LinqToDeliciousTest
         /// <summary>
         /// A test for date less than/equal clauses.
         ///
-        /// Query(LinqToDelicious.Post).Where(post => (post.Date &lt;= 1/1/2008 12:00:00 AM))
+        /// Query(LinqToDelicious.Post).Where(post => (post.Date &lte;= 1/1/2008 12:00:00 AM))
         ///</summary>
         [TestMethod()]
         [DeploymentItem("LinqToDelicious.dll")]
@@ -136,9 +136,9 @@ namespace LinqToDeliciousTest
         }
 
         /// <summary>
-        /// A test for date less than/equal clauses.
+        /// A test for date greater than/equal clauses.
         ///
-        /// Query(LinqToDelicious.Post).Where(post => (post.Date &lt;= 1/1/2008 12:00:00 AM))
+        /// Query(LinqToDelicious.Post).Where(post => (post.Date &gte;= 1/1/2008 12:00:00 AM))
         ///</summary>
         [TestMethod()]
         [DeploymentItem("LinqToDelicious.dll")]
