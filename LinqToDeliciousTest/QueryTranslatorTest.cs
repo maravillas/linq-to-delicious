@@ -107,7 +107,7 @@ namespace LinqToDeliciousTest
         /// <summary>
         /// A test for date less than/equal clauses.
         ///
-        /// Query(LinqToDelicious.Post).Where(post => (post.Date &lte;= 1/1/2008 12:00:00 AM))
+        /// Query(LinqToDelicious.Post).Where(post => (post.Date &lt;= 1/1/2008 12:00:00 AM))
         ///</summary>
         [TestMethod()]
         [DeploymentItem("LinqToDelicious.dll")]
@@ -143,7 +143,7 @@ namespace LinqToDeliciousTest
         /// <summary>
         /// A test for date greater than/equal clauses.
         ///
-        /// Query(LinqToDelicious.Post).Where(post => (post.Date &gte;= 1/1/2008 12:00:00 AM))
+        /// Query(LinqToDelicious.Post).Where(post => (post.Date &gt;= 1/1/2008 12:00:00 AM))
         ///</summary>
         [TestMethod()]
         [DeploymentItem("LinqToDelicious.dll")]
@@ -173,6 +173,51 @@ namespace LinqToDeliciousTest
             Debug.WriteLine("url: " + url);
 
             Assert.IsTrue(url.Contains("tag=example"));
+        }
+
+        /// <summary>
+        /// A test for date and tag clauses together.
+        ///
+        /// Query(LinqToDelicious.Post).Where(post => (post.Tags.Contains("example") && post.Date &gt; 1/1/2008 12:00:00 AM))
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("LinqToDelicious.dll")]
+        public void WhereTagsAndDateGreaterThan()
+        {
+            Expression tagClause = BuildTagClause(mParam, "example");
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.GreaterThan(left, right));
+            Expression tagAndDateClauses = Expression.And(tagClause, dateClause);
+
+            string url = TranslateQuery(mParam, tagAndDateClauses);
+
+            Debug.WriteLine("url: " + url);
+
+            Assert.IsTrue(url.Contains("tag=example"));
+            Assert.IsTrue(url.Contains("fromdt=1/1/2008 12:00:00 AM"));
+            Assert.IsFalse(url.Contains("todt="));
+        }
+
+        /// <summary>
+        /// A test for date and tag clauses together.
+        ///
+        /// Query(LinqToDelicious.Post).Where(post => (post.Tags.Contains("example") && post.Date = 1/1/2008 12:00:00 AM))
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("LinqToDelicious.dll")]
+        public void WhereTagsAndDateEquals()
+        {
+            Expression tagClause = BuildTagClause(mParam, "example");
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.Equal(left, right));
+            Expression tagAndDateClauses = Expression.And(tagClause, dateClause);
+
+            string url = TranslateQuery(mParam, tagAndDateClauses);
+
+            Debug.WriteLine("url: " + url);
+
+            Assert.IsTrue(url.Contains("tag=example"));
+
+            Assert.IsTrue(url.Contains("fromdt=1/1/2008 12:00:00 AM"));
+            Assert.IsTrue(url.Contains("todt=1/1/2008 12:00:00 AM"));
         }
 
         private Expression BuildTagClause(ParameterExpression lambdaParameter, String tag)

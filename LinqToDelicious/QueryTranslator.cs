@@ -123,54 +123,70 @@ namespace LinqToDelicious
         {
             Debug.WriteLine("Visiting binary expression " + binaryExpression);
 
-            Visit(binaryExpression.Left);
-
-            Debug.Assert(mStack.Peek().GetType() == typeof(String), "Expected String on the stack, was " + mStack.Peek().GetType());
-
-            String token = (String)mStack.Pop();
-
-            if (token.Equals(DATE_TOKEN))
+            if (binaryExpression.NodeType == ExpressionType.And)
             {
+                Visit(binaryExpression.Left);
                 Visit(binaryExpression.Right);
+            }
+            else if (binaryExpression.NodeType == ExpressionType.Equal ||
+                binaryExpression.NodeType == ExpressionType.LessThan ||
+                binaryExpression.NodeType == ExpressionType.LessThanOrEqual ||
+                binaryExpression.NodeType == ExpressionType.GreaterThan ||
+                binaryExpression.NodeType == ExpressionType.GreaterThanOrEqual)
+            {
+                Visit(binaryExpression.Left);
 
-                Debug.Assert(mStack.Peek().GetType() == typeof(DateTime), "Expected DateTime on the stack, was " + mStack.Peek().GetType());
+                Debug.Assert(mStack.Peek().GetType() == typeof(String), "Expected String on the stack, was " + mStack.Peek().GetType());
 
-                DateTime date = (DateTime)mStack.Pop();
+                String token = (String)mStack.Pop();
 
-                switch (binaryExpression.NodeType)
+                if (token.Equals(DATE_TOKEN))
                 {
-                    case ExpressionType.Equal:
-                        mBuilder.Append(String.Format("&fromdt={0}&todt={0}", date));
+                    Visit(binaryExpression.Right);
 
-                        break;
+                    Debug.Assert(mStack.Peek().GetType() == typeof(DateTime), "Expected DateTime on the stack, was " + mStack.Peek().GetType());
 
-                    case ExpressionType.LessThan:
-                        mBuilder.Append(String.Format("&todt={0}", date));
+                    DateTime date = (DateTime)mStack.Pop();
 
-                        break;
+                    switch (binaryExpression.NodeType)
+                    {
+                        case ExpressionType.Equal:
+                            mBuilder.Append(String.Format("&fromdt={0}&todt={0}", date));
 
-                    case ExpressionType.LessThanOrEqual:
-                        date = date.AddDays(1);
+                            break;
 
-                        mBuilder.Append(String.Format("&todt={0}", date));
+                        case ExpressionType.LessThan:
+                            mBuilder.Append(String.Format("&todt={0}", date));
 
-                        break;
+                            break;
 
-                    case ExpressionType.GreaterThan:
-                        mBuilder.Append(String.Format("&fromdt={0}", date));
+                        case ExpressionType.LessThanOrEqual:
+                            date = date.AddDays(1);
 
-                        break;
+                            mBuilder.Append(String.Format("&todt={0}", date));
 
-                    case ExpressionType.GreaterThanOrEqual:
-                        date = date.AddDays(-1);
+                            break;
 
-                        mBuilder.Append(String.Format("&fromdt={0}", date));
+                        case ExpressionType.GreaterThan:
+                            mBuilder.Append(String.Format("&fromdt={0}", date));
 
-                        break;
+                            break;
 
-                    default:
-                        throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported for date comparisons", binaryExpression.NodeType));
+                        case ExpressionType.GreaterThanOrEqual:
+                            date = date.AddDays(-1);
+
+                            mBuilder.Append(String.Format("&fromdt={0}", date));
+
+                            break;
+
+                        default:
+                            throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported for date comparisons", binaryExpression.NodeType));
+                    }
                 }
+            }
+            else
+            {
+                throw new NotSupportedException(string.Format("The operator '{0}' is not supported", binaryExpression.NodeType));
             }
 
 
@@ -193,8 +209,6 @@ namespace LinqToDelicious
             if (member.Expression != null && 
                 member.Expression.NodeType == ExpressionType.Parameter)
             {
-                Debug.WriteLine("Pushing \"" + member.Member.Name.ToLower() + "\"");
-
                 mStack.Push(member.Member.Name.ToLower());
 
                 return member;
