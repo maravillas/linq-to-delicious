@@ -65,23 +65,6 @@ namespace LinqToDelicious
             }
             else if (methodCall.Method.Name == "Contains")
             {
-                /*
-                if (token.Equals(TAG_TOKEN))
-                {
-                    if (binaryExpression.NodeType == ExpressionType.Equal)
-                    {
-                        mBuilder.Append("&tag=");
-
-                        Visit(binaryExpression.Right);
-
-                        mBuilder.Append(mStack.Pop());
-                    }
-                    else
-                    {
-                        throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported for tag comparisons", binaryExpression.NodeType));
-                    }
-                }
-                */
                 Visit(methodCall.Object);
 
                 String token = (String)mStack.Pop();
