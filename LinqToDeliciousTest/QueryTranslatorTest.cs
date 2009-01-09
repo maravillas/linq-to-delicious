@@ -6,6 +6,7 @@ using Rhino.Mocks;
 using System.Linq;
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace LinqToDeliciousTest
 {
@@ -151,6 +152,60 @@ namespace LinqToDeliciousTest
             Assert.IsFalse(url.Contains("todt="));
         }
 
+        /// <summary>
+        /// A test for tag clauses.
+        ///
+        /// Query(LinqToDelicious.Post).Where(post => (post.Tags.Contains("example")))
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("LinqToDelicious.dll")]
+        public void WhereTags()
+        {
+            String tagName = "example";
+
+            // from post in queryable
+            // where post.Tags.Contains("example")
+
+            // i.e. queryable.Where(post => post.Tags.Contains("Example"))
+
+            // TODO: This should probably be mocked instead of using a meaningless array.
+            // See the TODO below - it probably relates.
+            IQueryable<Post> queryable = new Post[] { }.AsQueryable<Post>();
+
+            // param represents the parameter to the lambda expression
+            ParameterExpression param = Expression.Parameter(typeof(Post), "post");
+
+            // post.Tags
+            MemberExpression member = Expression.Property(param, "Tags");
+
+            // "example"
+            ConstantExpression tag = Expression.Constant(tagName);
+
+            // post.Tags.Contains("Example")
+            MethodCallExpression containsCall = Expression.Call(
+                member,
+                typeof(List<String>).GetMethod("Contains", new Type[] { typeof(String) }),
+                tag);
+
+            // queryable.Where( ... )
+            MethodCallExpression whereCall = Expression.Call(
+                typeof(Queryable),
+                "Where",
+                new Type[] { typeof(Post) },
+                queryable.Expression,
+                Expression.Lambda<Func<Post, bool>>(containsCall, new ParameterExpression[] { param }));
+
+            // TODO: Double check that queryable.Expression gives us what we want above
+            // Debug output says it results in a Post[], but I thought it should be an IQueryable<Post>
+            // This argument isn't used in the translator at the moment.
+            
+            string url = new QueryTranslator(whereCall).Translate();
+
+            Debug.WriteLine("url: " + url);
+
+            Assert.IsTrue(url.Contains("tag=example"));
+        }
+
         private string TranslateComparison(Func<Expression, Expression, Expression> comparator)
         {
             DateTime comparedDate = new DateTime(2008, 1, 1);
@@ -172,9 +227,13 @@ namespace LinqToDeliciousTest
             // param represents the parameter to the lambda expression
             ParameterExpression param = Expression.Parameter(typeof(Post), "post");
 
-            // post.Date == <evaluated comparedDate>
+            // post.Date
             Expression left = Expression.Property(param, "Date");
+
+            // <evaluated comparedDate>
             Expression right = Expression.Constant(comparedDate);
+
+            // post.Date == <evaluated comparedDate>
             Expression comparison = comparator(left, right);
 
             // queryable.Where( ... )

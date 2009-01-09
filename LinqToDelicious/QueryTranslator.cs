@@ -16,7 +16,7 @@ namespace LinqToDelicious
         private StringBuilder mBuilder;
         private Stack<Object> mStack;
 
-        private const String TAG_TOKEN = "tag";
+        private const String TAG_TOKEN = "tags";
         private const String DATE_TOKEN = "date";
 
         public QueryTranslator(Expression expression)
@@ -63,7 +63,51 @@ namespace LinqToDelicious
 
                 return methodCall;
             }
+            else if (methodCall.Method.Name == "Contains")
+            {
+                /*
+                if (token.Equals(TAG_TOKEN))
+                {
+                    if (binaryExpression.NodeType == ExpressionType.Equal)
+                    {
+                        mBuilder.Append("&tag=");
 
+                        Visit(binaryExpression.Right);
+
+                        mBuilder.Append(mStack.Pop());
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported for tag comparisons", binaryExpression.NodeType));
+                    }
+                }
+                */
+                Visit(methodCall.Object);
+
+                String token = (String)mStack.Pop();
+                
+                if (token.Equals(TAG_TOKEN) &&
+                    methodCall.Method.DeclaringType == typeof(List<string>))
+                {
+                    // Would it be reasonable to assume these conditions are true?
+                    if (methodCall.Arguments.Count == 1 &&
+                        methodCall.Arguments[0].NodeType == ExpressionType.Constant)
+                    {
+                        mBuilder.Append("&tag=");
+
+                        Visit(methodCall.Arguments[0]);
+
+                        mBuilder.Append(mStack.Pop());
+                    }
+                    else
+                    {
+                        throw new Exception("Missing or invalid argument to method Contains");
+                    }
+                }
+
+                return methodCall;
+            }
+            
             // Where Query(LinqToDelicious.Post), post => (post.Date > new DateTime(2008, 1, 1))
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", methodCall.Method.Name));
         }
@@ -85,23 +129,7 @@ namespace LinqToDelicious
 
             String token = (String)mStack.Pop();
 
-            if (token.Equals(TAG_TOKEN))
-            {
-                if (binaryExpression.NodeType == ExpressionType.Equal)
-                {
-                    mBuilder.Append("&tag=");
-
-                    Visit(binaryExpression.Right);
-
-                    mBuilder.Append(mStack.Pop());
-                }
-                else
-                {
-                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported for tag comparisons", binaryExpression.NodeType));
-                }
-            }
-
-            else if (token.Equals(DATE_TOKEN))
+            if (token.Equals(DATE_TOKEN))
             {
                 Visit(binaryExpression.Right);
 
