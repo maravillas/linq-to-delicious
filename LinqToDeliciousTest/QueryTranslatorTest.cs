@@ -17,7 +17,8 @@ namespace LinqToDeliciousTest
     [TestClass()]
     public class QueryTranslatorTest
     {
-        private MockRepository mocks = new MockRepository();
+        private MockRepository mMocks = new MockRepository();
+        private ParameterExpression mParam = Expression.Parameter(typeof(Post), "post");
 
         private TestContext testContextInstance;
 
@@ -76,7 +77,8 @@ namespace LinqToDeliciousTest
         [DeploymentItem("LinqToDelicious.dll")]
         public void WhereDateEqual()
         {
-            string url = TranslateComparison((left, right) => Expression.Equal(left, right));
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.Equal(left, right));
+            string url = TranslateQuery(mParam, dateClause);
 
             Debug.WriteLine("url: " + url);
 
@@ -93,7 +95,8 @@ namespace LinqToDeliciousTest
         [DeploymentItem("LinqToDelicious.dll")]
         public void WhereDateLessThan()
         {
-            string url = TranslateComparison((left, right) => Expression.LessThan(left, right));
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.LessThan(left, right));
+            string url = TranslateQuery(mParam, dateClause);
 
             Debug.WriteLine("url: " + url);
 
@@ -110,7 +113,8 @@ namespace LinqToDeliciousTest
         [DeploymentItem("LinqToDelicious.dll")]
         public void WhereDateLessThanOrEqual()
         {
-            string url = TranslateComparison((left, right) => Expression.LessThanOrEqual(left, right));
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.LessThanOrEqual(left, right));
+            string url = TranslateQuery(mParam, dateClause);
 
             Debug.WriteLine("url: " + url);
 
@@ -127,7 +131,8 @@ namespace LinqToDeliciousTest
         [DeploymentItem("LinqToDelicious.dll")]
         public void WhereDateGreaterThan()
         {
-            string url = TranslateComparison((left, right) => Expression.GreaterThan(left, right));
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.GreaterThan(left, right));
+            string url = TranslateQuery(mParam, dateClause);
 
             Debug.WriteLine("url: " + url);
 
@@ -144,10 +149,11 @@ namespace LinqToDeliciousTest
         [DeploymentItem("LinqToDelicious.dll")]
         public void WhereDateGreaterOrThanEqual()
         {
-            string url = TranslateComparison((left, right) => Expression.GreaterThanOrEqual(left, right));
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.GreaterThanOrEqual(left, right));
+            string url = TranslateQuery(mParam, dateClause);
 
             Debug.WriteLine("url: " + url);
-
+            
             Assert.IsTrue(url.Contains("fromdt=12/31/2007 12:00:00 AM"));
             Assert.IsFalse(url.Contains("todt="));
         }
@@ -161,55 +167,52 @@ namespace LinqToDeliciousTest
         [DeploymentItem("LinqToDelicious.dll")]
         public void WhereTags()
         {
-            String tagName = "example";
-
-            // from post in queryable
-            // where post.Tags.Contains("example")
-
-            // i.e. queryable.Where(post => post.Tags.Contains("Example"))
-
-            // TODO: This should probably be mocked instead of using a meaningless array.
-            // See the TODO below - it probably relates.
-            IQueryable<Post> queryable = new Post[] { }.AsQueryable<Post>();
-
-            // param represents the parameter to the lambda expression
-            ParameterExpression param = Expression.Parameter(typeof(Post), "post");
-
-            // post.Tags
-            MemberExpression member = Expression.Property(param, "Tags");
-
-            // "example"
-            ConstantExpression tag = Expression.Constant(tagName);
-
-            // post.Tags.Contains("Example")
-            MethodCallExpression containsCall = Expression.Call(
-                member,
-                typeof(List<String>).GetMethod("Contains", new Type[] { typeof(String) }),
-                tag);
-
-            // queryable.Where( ... )
-            MethodCallExpression whereCall = Expression.Call(
-                typeof(Queryable),
-                "Where",
-                new Type[] { typeof(Post) },
-                queryable.Expression,
-                Expression.Lambda<Func<Post, bool>>(containsCall, new ParameterExpression[] { param }));
-
-            // TODO: Double check that queryable.Expression gives us what we want above
-            // Debug output says it results in a Post[], but I thought it should be an IQueryable<Post>
-            // This argument isn't used in the translator at the moment.
-            
-            string url = new QueryTranslator(whereCall).Translate();
+            Expression tagClause = BuildTagClause(mParam, "example");
+            string url = TranslateQuery(mParam, tagClause);
 
             Debug.WriteLine("url: " + url);
 
             Assert.IsTrue(url.Contains("tag=example"));
         }
 
-        private string TranslateComparison(Func<Expression, Expression, Expression> comparator)
+        private Expression BuildTagClause(ParameterExpression lambdaParameter, String tag)
         {
-            DateTime comparedDate = new DateTime(2008, 1, 1);
+            // post.Tags
+            MemberExpression member = Expression.Property(lambdaParameter, "Tags");
 
+            // "example"
+            ConstantExpression tagExpression = Expression.Constant(tag);
+
+            // post.Tags.Contains("Example")
+            MethodCallExpression containsCall = Expression.Call(
+                member,
+                typeof(List<String>).GetMethod("Contains", new Type[] { typeof(String) }),
+                tagExpression);
+
+            return containsCall;
+        }
+
+        private Expression BuildDateClause(ParameterExpression lambdaParameter, DateTime date, Func<Expression, Expression, Expression> comparator)
+        {
+            //IQueryable<Post> queryable = mocks.StrictMock<IQueryable<Post>>();
+            // ConstantExpression queryableExpression = Expression.Constant(queryable);
+            // SetupResult.For(queryable.Expression).Return(queryableExpression);
+            // Debug.WriteLine(queryable.Expression);
+
+            // post.Date
+            Expression left = Expression.Property(lambdaParameter, "Date");
+
+            // <evaluated comparedDate>
+            Expression right = Expression.Constant(date);
+
+            // post.Date == <evaluated comparedDate>
+            Expression comparison = comparator(left, right);
+
+            return comparison;
+        }
+
+        private string TranslateQuery(ParameterExpression lambdaParameter, Expression clauses)
+        {
             // from post in queryable
             // where post.Date == <evaluated comparedDate>
 
@@ -219,30 +222,13 @@ namespace LinqToDeliciousTest
             // See the TODO below - it probably relates.
             IQueryable<Post> queryable = new Post[] { }.AsQueryable<Post>();
 
-            //IQueryable<Post> queryable = mocks.StrictMock<IQueryable<Post>>();
-            // ConstantExpression queryableExpression = Expression.Constant(queryable);
-            // SetupResult.For(queryable.Expression).Return(queryableExpression);
-            // Debug.WriteLine(queryable.Expression);
-
-            // param represents the parameter to the lambda expression
-            ParameterExpression param = Expression.Parameter(typeof(Post), "post");
-
-            // post.Date
-            Expression left = Expression.Property(param, "Date");
-
-            // <evaluated comparedDate>
-            Expression right = Expression.Constant(comparedDate);
-
-            // post.Date == <evaluated comparedDate>
-            Expression comparison = comparator(left, right);
-
             // queryable.Where( ... )
             MethodCallExpression whereCall = Expression.Call(
                 typeof(Queryable),
                 "Where",
                 new Type[] { typeof(Post) },
                 queryable.Expression,
-                Expression.Lambda<Func<Post, bool>>(comparison, new ParameterExpression[] { param }));
+                Expression.Lambda<Func<Post, bool>>(clauses, new ParameterExpression[] { lambdaParameter }));
 
             // TODO: Double check that queryable.Expression gives us what we want above
             // Debug output says it results in a Post[], but I thought it should be an IQueryable<Post>
