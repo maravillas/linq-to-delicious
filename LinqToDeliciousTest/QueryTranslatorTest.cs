@@ -237,6 +237,21 @@ namespace LinqToDeliciousTest
             TranslateQuery(mParam, tagAndDateClauses);
         }
 
+        /// <summary>
+        /// A test for an NotSupportedException when trying to compare dates with !=.
+        ///
+        /// Query(LinqToDelicious.Post).Where(post => (post.Date != 1/1/2008 12:00:00 AM))
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("LinqToDelicious.dll")]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void UnsupportedDateComparison()
+        {
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.NotEqual(left, right));
+
+            TranslateQuery(mParam, dateClause);
+        }
+
         private Expression BuildTagClause(ParameterExpression lambdaParameter, String tag)
         {
             // post.Tags
