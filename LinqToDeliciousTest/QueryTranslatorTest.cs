@@ -220,6 +220,23 @@ namespace LinqToDeliciousTest
             Assert.IsTrue(url.Contains("todt=1/1/2008 12:00:00 AM"));
         }
 
+        /// <summary>
+        /// A test for an NotSupportedException when trying to OR in the where clause.
+        ///
+        /// Query(LinqToDelicious.Post).Where(post => (post.Tags.Contains("example") || post.Date = 1/1/2008 12:00:00 AM))
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("LinqToDelicious.dll")]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void UnsupportedWhereClause()
+        {
+            Expression tagClause = BuildTagClause(mParam, "example");
+            Expression dateClause = BuildDateClause(mParam, new DateTime(2008, 1, 1), (left, right) => Expression.Equal(left, right));
+            Expression tagAndDateClauses = Expression.Or(tagClause, dateClause);
+
+            TranslateQuery(mParam, tagAndDateClauses);
+        }
+
         private Expression BuildTagClause(ParameterExpression lambdaParameter, String tag)
         {
             // post.Tags
