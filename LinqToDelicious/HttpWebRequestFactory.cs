@@ -8,7 +8,7 @@ namespace LinqToDelicious
 {
     class HttpWebRequestFactory : IHttpWebRequestFactory
     {
-        public HttpWebRequest CreateRequest(string uri)
+        public HttpWebRequest Create(string uri)
         {
             return (HttpWebRequest)WebRequest.Create(uri);
         }

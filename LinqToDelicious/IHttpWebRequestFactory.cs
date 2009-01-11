@@ -8,6 +8,6 @@ namespace LinqToDelicious
 {
     interface IHttpWebRequestFactory
     {
-        HttpWebRequest CreateRequest(string uri);
+        HttpWebRequest Create(string uri);
     }
 }
