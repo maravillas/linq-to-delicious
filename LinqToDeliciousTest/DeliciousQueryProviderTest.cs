@@ -55,35 +55,42 @@ namespace LinqToDeliciousTest
             "2008-12-12T04:04:24Z",
             "fa2a46d239ad4f089c3ce7961d958b2e");
 
+        MockRepository mocks = new MockRepository();
+
+        IDelayer delayer;
+        IQueryTranslatorFactory translatorFactory;
+        IQueryTranslator translator;
+        IHttpWebRequestFactory requestFactory;
+        HttpWebRequest request;
+        HttpWebResponse response;
+
+        Expression expression = Expression.Constant(new Object());
+
+        string uri = "http://www.example.com";
+
+        Byte[] documentBytes = new UTF8Encoding().GetBytes(DOCUMENT);
+        Stream stream = new MemoryStream();
+
+        DeliciousQueryProvider provider;
 
         public DeliciousQueryProviderTest()
         {
+            delayer = mocks.StrictMock<IDelayer>();
+            translatorFactory = mocks.StrictMock<IQueryTranslatorFactory>();
+            translator = mocks.StrictMock<IQueryTranslator>();
+            requestFactory = mocks.StrictMock<IHttpWebRequestFactory>();
+            request = mocks.StrictMock<HttpWebRequest>();
+            response = mocks.StrictMock<HttpWebResponse>();
 
+            stream.Write(documentBytes, 0, documentBytes.Length);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            provider = new DeliciousQueryProvider(requestFactory, delayer, translatorFactory);
         }
 
         [TestMethod]
         public void Execute()
         {
-            MockRepository mocks = new MockRepository();
-
-            IDelayer delayer = mocks.StrictMock<IDelayer>();
-            IQueryTranslatorFactory translatorFactory = mocks.StrictMock<IQueryTranslatorFactory>();
-            IQueryTranslator translator = mocks.StrictMock<IQueryTranslator>();
-            IHttpWebRequestFactory requestFactory = mocks.StrictMock<IHttpWebRequestFactory>();
-            HttpWebRequest request = mocks.StrictMock<HttpWebRequest>();
-            HttpWebResponse response = mocks.StrictMock<HttpWebResponse>();
-
-            Expression expression = Expression.Constant(new Object());
-
-            string uri = "http://www.example.com";
-
-            Byte[] documentBytes = new UTF8Encoding().GetBytes(DOCUMENT);
-            Stream stream = new MemoryStream();
-            stream.Write(documentBytes, 0, documentBytes.Length);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            DeliciousQueryProvider provider = new DeliciousQueryProvider(requestFactory, delayer, translatorFactory);
-
             // Set up the mocked call to Delay to actually execute the callback
             Expect.Call(delayer.Delay(null)).IgnoreArguments().Do((CallbackDelegate)delegate(Callback callback)
             {
@@ -104,7 +111,7 @@ namespace LinqToDeliciousTest
             object result = provider.Execute(expression);
 
             Assert.IsInstanceOfType(result, typeof(IEnumerable<Post>));
-            
+
             IEnumerable<Post> posts = (IEnumerable<Post>)result;
 
             Assert.IsTrue(posts.Contains(EXAMPLE_POST), "Missing post for example.com.");
