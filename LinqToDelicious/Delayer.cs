@@ -12,6 +12,7 @@ namespace LinqToDelicious
     class Delayer : IDelayer
     {
         public int DelayLength { get; private set; }
+        public int AdditionalDelay { get; set; }
 
         private Callback mCallback;
         private DateTime mLastCall;
@@ -25,7 +26,7 @@ namespace LinqToDelicious
         public object Delay(Callback callback)
         {
             int timeDifference = (int)(DateTime.Now - mLastCall).TotalMilliseconds;
-            int delay = Math.Max(DelayLength - timeDifference, 0);
+            int delay = Math.Max((DelayLength + Math.Max(AdditionalDelay, 0)) - timeDifference, 0);
 
             mCallback = callback;
 
@@ -37,6 +38,7 @@ namespace LinqToDelicious
             }
 
             mLastCall = DateTime.Now;
+            AdditionalDelay = 0;
 
             return mCallback();
         }

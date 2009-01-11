@@ -9,6 +9,8 @@ namespace LinqToDelicious
 
     internal interface IDelayer
     {
+        int AdditionalDelay { get; set; }
+
         object Delay(Callback callback);
     }
 }

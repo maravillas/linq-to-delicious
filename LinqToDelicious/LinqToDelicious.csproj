@@ -48,6 +48,8 @@
     <Compile Include="Delayer.cs" />
     <Compile Include="Delicious.cs" />
     <Compile Include="DeliciousQueryProvider.cs" />
+    <Compile Include="HttpWebRequestFactory.cs" />
+    <Compile Include="IHttpWebRequestFactory.cs" />
     <Compile Include="IDelayer.cs" />
     <Compile Include="IQueryTranslator.cs" />
     <Compile Include="IQueryTranslatorFactory.cs" />

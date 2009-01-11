@@ -66,10 +66,12 @@ namespace LinqToDeliciousTest
         {
             MockRepository mocks = new MockRepository();
 
-            WebClient client = mocks.StrictMock<WebClient>();
             IDelayer delayer = mocks.StrictMock<IDelayer>();
-            IQueryTranslatorFactory factory = mocks.StrictMock<IQueryTranslatorFactory>();
+            IQueryTranslatorFactory translatorFactory = mocks.StrictMock<IQueryTranslatorFactory>();
             IQueryTranslator translator = mocks.StrictMock<IQueryTranslator>();
+            IHttpWebRequestFactory requestFactory = mocks.StrictMock<IHttpWebRequestFactory>();
+            HttpWebRequest request = mocks.StrictMock<HttpWebRequest>();
+            HttpWebResponse response = mocks.StrictMock<HttpWebResponse>();
 
             Expression expression = Expression.Constant(new Object());
 
@@ -80,7 +82,7 @@ namespace LinqToDeliciousTest
             stream.Write(documentBytes, 0, documentBytes.Length);
             stream.Seek(0, SeekOrigin.Begin);
 
-            DeliciousQueryProvider provider = new DeliciousQueryProvider(client, delayer, factory);
+            DeliciousQueryProvider provider = new DeliciousQueryProvider(requestFactory, delayer, translatorFactory);
 
             // Set up the mocked call to Delay to actually execute the callback
             Expect.Call(delayer.Delay(null)).IgnoreArguments().Do((CallbackDelegate)delegate(Callback callback)
@@ -88,9 +90,14 @@ namespace LinqToDeliciousTest
                 return callback();
             });
 
-            Expect.Call(factory.Create(expression)).Return(translator);
+            Expect.Call(translatorFactory.Create(expression)).Return(translator);
+            Expect.Call(requestFactory.Create(uri)).Return(request);
             Expect.Call(translator.Translate()).Return(uri);
-            Expect.Call(client.OpenRead(uri)).Return(stream);
+            Expect.Call(request.GetResponse()).Return(response);
+            Expect.Call(response.GetResponseStream()).Return(stream);
+            Expect.Call(response.StatusCode).Return(HttpStatusCode.OK);
+            Expect.Call(response.StatusCode).Return(HttpStatusCode.OK);
+            Expect.Call(delegate { response.Close(); });
 
             mocks.ReplayAll();
 

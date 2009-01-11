@@ -13,13 +13,15 @@ namespace LinqToDelicious
 {
     class DeliciousQueryProvider : QueryProvider
     {
-        private WebClient mWebClient;
+        private const int BACKOFF_DELAY = 10000;
+
+        private IHttpWebRequestFactory mRequestFactory;
         private IDelayer mDelayer;
         private IQueryTranslatorFactory mTranslatorFactory;
 
-        public DeliciousQueryProvider(WebClient webClient, IDelayer delayer, IQueryTranslatorFactory translatorFactory)
+        public DeliciousQueryProvider(IHttpWebRequestFactory requestFactory, IDelayer delayer, IQueryTranslatorFactory translatorFactory)
         {
-            mWebClient = webClient;
+            mRequestFactory = requestFactory;
             mDelayer = delayer;
             mTranslatorFactory = translatorFactory;
         }
@@ -39,20 +41,57 @@ namespace LinqToDelicious
 
                 Debug.WriteLine("Requesting " + uri);
 
-                Stream stream = mWebClient.OpenRead(uri);
+                HttpWebRequest request = mRequestFactory.Create(uri);
+                
+                HttpWebResponse response;
 
-                XDocument document = XDocument.Load(new StreamReader(stream));
+                try
+                {
+                    response = (HttpWebResponse)request.GetResponse();
+                }
+                catch (WebException ex)
+                {
+                    // TODO: Wrap this exception
+                    throw ex;
+                }
 
-                var posts = from post in document.Descendants("post")
-                            select new Post(post.Attribute("href").Value,
-                                            post.Attribute("hash").Value,
-                                            post.Attribute("description").Value,
-                                            post.Attribute("tag").Value,
-                                            post.Attribute("extended").Value,
-                                            post.Attribute("time").Value,
-                                            post.Attribute("meta").Value);
+                try
+                {
+                    if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                    {
+                        // Simple backoff, for now.
+                        mDelayer.AdditionalDelay = BACKOFF_DELAY;
 
-                return posts;
+                        throw new Exception("Could not read " + uri);
+                    }
+                    // Is this too strict?
+                    else if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        // TODO: Define an exception
+                        throw new Exception("Could not read " + uri);
+                    }
+                    else
+                    {
+                        Stream stream = response.GetResponseStream();
+
+                        XDocument document = XDocument.Load(new StreamReader(stream));
+
+                        var posts = from post in document.Descendants("post")
+                                    select new Post(post.Attribute("href").Value,
+                                                    post.Attribute("hash").Value,
+                                                    post.Attribute("description").Value,
+                                                    post.Attribute("tag").Value,
+                                                    post.Attribute("extended").Value,
+                                                    post.Attribute("time").Value,
+                                                    post.Attribute("meta").Value);
+
+                        return posts;
+                    }
+                }
+                finally
+                {
+                    response.Close();
+                }
             });
         }
     }
