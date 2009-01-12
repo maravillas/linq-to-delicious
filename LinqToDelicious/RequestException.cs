@@ -5,6 +5,9 @@ using System.Text;
 
 namespace LinqToDelicious
 {
+    /// <summary>
+    /// The exception that is thrown when a problem occurs while trying to request a Delicious page.
+    /// </summary>
     class RequestException : ApplicationException
     {
         public RequestException() { }

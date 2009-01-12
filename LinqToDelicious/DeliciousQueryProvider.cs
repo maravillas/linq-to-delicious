@@ -11,6 +11,9 @@ using System.Diagnostics;
 
 namespace LinqToDelicious
 {
+    /// <summary>
+    /// Evaluates query expressions and translates them into collections of Posts.
+    /// </summary>
     class DeliciousQueryProvider : QueryProvider
     {
         private const int BACKOFF_DELAY = 10000;
@@ -19,6 +22,12 @@ namespace LinqToDelicious
         private IDelayer mDelayer;
         private IQueryTranslatorFactory mTranslatorFactory;
 
+        /// <summary>
+        /// Creates a new DeliciousQueryProvider.
+        /// </summary>
+        /// <param name="requestFactory">The factory for creating HttpWebRequest objects.</param>
+        /// <param name="delayer">The IDelayer responsible for timing HTTP requests.</param>
+        /// <param name="translatorFactory">The factory for creating IQueryTranslator objects.</param>
         public DeliciousQueryProvider(IHttpWebRequestFactory requestFactory, IDelayer delayer, IQueryTranslatorFactory translatorFactory)
         {
             mRequestFactory = requestFactory;
@@ -66,7 +75,6 @@ namespace LinqToDelicious
                     // Is this too strict?
                     else if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        // TODO: Define an exception
                         throw new RequestException("Could not read " + uri);
                     }
                     else
