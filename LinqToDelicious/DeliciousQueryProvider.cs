@@ -42,7 +42,7 @@ namespace LinqToDelicious
                 Debug.WriteLine("Requesting " + uri);
 
                 HttpWebRequest request = mRequestFactory.Create(uri);
-                
+
                 HttpWebResponse response;
 
                 try
@@ -51,8 +51,7 @@ namespace LinqToDelicious
                 }
                 catch (WebException ex)
                 {
-                    // TODO: Wrap this exception
-                    throw ex;
+                    throw new RequestException("The request to " + uri + "  timed out", ex);
                 }
 
                 try
@@ -62,13 +61,13 @@ namespace LinqToDelicious
                         // Simple backoff, for now.
                         mDelayer.AdditionalDelay = BACKOFF_DELAY;
 
-                        throw new Exception("Could not read " + uri);
+                        throw new RequestException("Could not read " + uri);
                     }
                     // Is this too strict?
                     else if (response.StatusCode != HttpStatusCode.OK)
                     {
                         // TODO: Define an exception
-                        throw new Exception("Could not read " + uri);
+                        throw new RequestException("Could not read " + uri);
                     }
                     else
                     {
