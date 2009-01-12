@@ -89,7 +89,7 @@ namespace LinqToDeliciousTest
         }
 
         [TestMethod]
-        public void Execute()
+        public void FoundRequest()
         {
             // Set up the mocked call to Delay to actually execute the callback
             Expect.Call(delayer.Delay(null)).IgnoreArguments().Do((CallbackDelegate)delegate(Callback callback)
@@ -116,6 +116,32 @@ namespace LinqToDeliciousTest
 
             Assert.IsTrue(posts.Contains(EXAMPLE_POST), "Missing post for example.com.");
             Assert.IsTrue(posts.Contains(ANOTHER_EXAMPLE_POST), "Missing post for another-example.com.");
+
+            mocks.VerifyAll();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(RequestException))]
+        public void NotFoundRequest()
+        {
+            // Set up the mocked call to Delay to actually execute the callback
+            Expect.Call(delayer.Delay(null)).IgnoreArguments().Do((CallbackDelegate)delegate(Callback callback)
+            {
+                return callback();
+            });
+
+            Expect.Call(translatorFactory.Create(expression)).Return(translator);
+            Expect.Call(requestFactory.Create(uri)).Return(request);
+            Expect.Call(translator.Translate()).Return(uri);
+            Expect.Call(request.GetResponse()).Return(response);
+            Expect.Call(response.GetResponseStream()).Return(stream);
+            Expect.Call(response.StatusCode).Return(HttpStatusCode.NotFound);
+            Expect.Call(response.StatusCode).Return(HttpStatusCode.NotFound);
+            Expect.Call(delegate { response.Close(); });
+
+            mocks.ReplayAll();
+
+            object result = provider.Execute(expression);
 
             mocks.VerifyAll();
         }
