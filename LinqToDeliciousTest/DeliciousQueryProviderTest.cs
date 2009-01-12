@@ -146,6 +146,33 @@ namespace LinqToDeliciousTest
             mocks.VerifyAll();
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(RequestException))]
+        public void ServiceUnavailableRequest()
+        {
+            // Set up the mocked call to Delay to actually execute the callback
+            Expect.Call(delayer.Delay(null)).IgnoreArguments().Do((CallbackDelegate)delegate(Callback callback)
+            {
+                return callback();
+            });
+
+            delayer.AdditionalDelay = 10000;
+            Expect.Call(translatorFactory.Create(expression)).Return(translator);
+            Expect.Call(requestFactory.Create(uri)).Return(request);
+            Expect.Call(translator.Translate()).Return(uri);
+            Expect.Call(request.GetResponse()).Return(response);
+            Expect.Call(response.GetResponseStream()).Return(stream);
+            Expect.Call(response.StatusCode).Return(HttpStatusCode.ServiceUnavailable);
+            Expect.Call(response.StatusCode).Return(HttpStatusCode.ServiceUnavailable);
+            Expect.Call(delegate { response.Close(); });
+
+            mocks.ReplayAll();
+
+            object result = provider.Execute(expression);
+
+            mocks.VerifyAll();
+        }
+
         private TestContext testContextInstance;
 
         /// <summary>
