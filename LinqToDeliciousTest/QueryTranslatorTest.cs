@@ -260,7 +260,7 @@ namespace LinqToDeliciousTest
             // "example"
             ConstantExpression tagExpression = Expression.Constant(tag);
 
-            // post.Tags.Contains("Example")
+            // post.Tags.Contains("example")
             MethodCallExpression containsCall = Expression.Call(
                 member,
                 typeof(List<String>).GetMethod("Contains", new Type[] { typeof(String) }),
