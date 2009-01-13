@@ -26,27 +26,27 @@ namespace LinqToDeliciousTest
         }
 
         [TestMethod]
-        public void DelayImmediate1000Milliseconds()
+        public void Immediate1000MillisecondDelay()
         {
             TestImmediateDelay(new Delayer(1000), 1000);
         }
 
         [TestMethod]
-        public void DelayImmediate100Milliseconds()
+        public void Immediate100MillisecondDelay()
         {
             TestImmediateDelay(new Delayer(100), 100);
         }
 
         [TestMethod]
-        public void Delay1000Milliseconds()
+        public void Subsequent1000MillisecondDelay()
         {
-            TestDelay(new Delayer(1000), 1000);
+            TestSubsequentDelay(new Delayer(1000), 1000);
         }
 
         [TestMethod]
-        public void Delay100Milliseconds()
+        public void Subsequent100MillisecondDelay()
         {
-            TestDelay(new Delayer(100), 100);
+            TestSubsequentDelay(new Delayer(100), 100);
         }
 
         [TestMethod]
@@ -59,12 +59,12 @@ namespace LinqToDeliciousTest
         }
 
         [TestMethod]
-        public void AdditionalRepeatedDelay()
+        public void AdditionalSubsequentDelay()
         {
             Delayer delayer = new Delayer(100);
             delayer.AdditionalDelay = 100;
 
-            TestDelay(delayer, 100);
+            TestSubsequentDelay(delayer, 100);
         }
 
         private void TestImmediateDelay(Delayer delayer, int delay)
@@ -100,7 +100,7 @@ namespace LinqToDeliciousTest
             }
         }
 
-        private void TestDelay(Delayer delayer, int delay)
+        private void TestSubsequentDelay(Delayer delayer, int delay)
         {
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
@@ -121,6 +121,9 @@ namespace LinqToDeliciousTest
                 return obj;
             };
 
+            // This is the difference between this method and TestImmediateDelay.
+            // This method ignores the first call to Delay and tests the delay of the
+            // second call to Delay.
             delayer.Delay(nop);
 
             DateTime timeStarted = DateTime.Now;
