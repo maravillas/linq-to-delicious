@@ -26,9 +26,9 @@ namespace LinqToDeliciousTest
         }
 
         [TestMethod]
-        public void Immediate1000MillisecondDelay()
+        public void Immediate500MillisecondDelay()
         {
-            TestImmediateDelay(new Delayer(1000), 1000);
+            TestImmediateDelay(new Delayer(500), 500);
         }
 
         [TestMethod]
@@ -38,9 +38,9 @@ namespace LinqToDeliciousTest
         }
 
         [TestMethod]
-        public void Subsequent1000MillisecondDelay()
+        public void Subsequent500MillisecondDelay()
         {
-            TestSubsequentDelay(new Delayer(1000), 1000);
+            TestSubsequentDelay(new Delayer(500), 500);
         }
 
         [TestMethod]
