@@ -28,36 +28,52 @@ namespace LinqToDeliciousTest
         [TestMethod]
         public void DelayImmediate1000Milliseconds()
         {
-            TestImmediateDelay(1000);
+            TestImmediateDelay(new Delayer(1000), 1000);
         }
 
         [TestMethod]
         public void DelayImmediate100Milliseconds()
         {
-            TestImmediateDelay(100);
+            TestImmediateDelay(new Delayer(100), 100);
         }
 
         [TestMethod]
         public void Delay1000Milliseconds()
         {
-            TestDelay(1000);
+            TestDelay(new Delayer(1000), 1000);
         }
 
         [TestMethod]
         public void Delay100Milliseconds()
         {
-            TestDelay(100);
+            TestDelay(new Delayer(100), 100);
         }
 
-        private void TestImmediateDelay(int delay)
+        [TestMethod]
+        public void AdditionalImmediateDelay()
+        {
+            Delayer delayer = new Delayer(100);
+            delayer.AdditionalDelay = 100;
+
+            TestImmediateDelay(delayer, 200);
+        }
+
+        [TestMethod]
+        public void AdditionalRepeatedDelay()
+        {
+            Delayer delayer = new Delayer(100);
+            delayer.AdditionalDelay = 100;
+
+            TestDelay(delayer, 100);
+        }
+
+        private void TestImmediateDelay(Delayer delayer, int delay)
         {
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
             bool called = false;
             DateTime timeCalled = DateTime.MaxValue;
             Object obj = new Object();
-
-            Delayer delayer = new Delayer(delay);
 
             Callback callback = delegate()
             {
@@ -84,15 +100,13 @@ namespace LinqToDeliciousTest
             }
         }
 
-        private void TestDelay(int delay)
+        private void TestDelay(Delayer delayer, int delay)
         {
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
             bool called = false;
             DateTime timeCalled = DateTime.MaxValue;
             Object obj = new Object();
-
-            Delayer delayer = new Delayer(delay);
 
             Callback nop = delegate()
             {
@@ -122,7 +136,7 @@ namespace LinqToDeliciousTest
             Assert.IsTrue(called);
             Assert.AreSame(obj, result);
 
-            Assert.IsTrue(timeElapsed >= delay - elapsedError, 
+            Assert.IsTrue(timeElapsed >= delay - elapsedError,
                 "Delay was not at least (" + delay + " - " + elapsedError + ") msec; total time elapsed was " + timeElapsed);
 
             if (timeElapsed > delay + elapsedError)
