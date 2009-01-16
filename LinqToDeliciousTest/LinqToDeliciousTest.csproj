@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="DelayerTest.cs" />
     <Compile Include="DeliciousQueryProviderTest.cs" />
+    <Compile Include="HttpWebRequestFactoryTest.cs" />
     <Compile Include="PostTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryTranslatorTest.cs" />

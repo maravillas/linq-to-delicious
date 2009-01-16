@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
+using System.Reflection;
 
 namespace LinqToDelicious
 {
@@ -11,6 +12,15 @@ namespace LinqToDelicious
     /// </summary>
     class HttpWebRequestFactory : IHttpWebRequestFactory
     {
+        private string mUsername;
+        private string mPassword;
+
+        public HttpWebRequestFactory(string username, string password)
+        {
+            mUsername = username;
+            mPassword = password;
+        }
+            
         /// <summary>
         /// Create a new HttpWebRequest.
         /// </summary>
@@ -18,7 +28,13 @@ namespace LinqToDelicious
         /// <returns>The request.</returns>
         public HttpWebRequest Create(string uri)
         {
-            return (HttpWebRequest)WebRequest.Create(uri);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+
+            AssemblyName name = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+            request.UserAgent = name.Name + " " + name.Version.ToString();
+            request.Credentials = new NetworkCredential(mUsername, mPassword);
+
+            return request;
         }
     }
 }

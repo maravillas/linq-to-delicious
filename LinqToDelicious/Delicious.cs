@@ -12,11 +12,11 @@ namespace LinqToDelicious
     {
         public Query<Post> Posts { get; private set; }
 
-        public Delicious()
+        public Delicious(string username, string password)
         {
             Delayer delayer = new Delayer(1000);
             QueryTranslatorFactory translatorFactory = new QueryTranslatorFactory();
-            IHttpWebRequestFactory requestFactory = new HttpWebRequestFactory();
+            IHttpWebRequestFactory requestFactory = new HttpWebRequestFactory(username, password);
 
             QueryProvider provider = new DeliciousQueryProvider(requestFactory, delayer, translatorFactory);
 

@@ -26,7 +26,7 @@ namespace tasty
         {
             InitializeComponent();
 
-            var query = from post in new Delicious().Posts
+            var query = from post in new Delicious("username", "password").Posts
                         where post.Date == new DateTime(2008, 1, 1)
                         select post;
 
