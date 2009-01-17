@@ -134,31 +134,31 @@ namespace LinqToDelicious
                     switch (binaryExpression.NodeType)
                     {
                         case ExpressionType.Equal:
-                            mBuilder.Append(String.Format("&fromdt={0}&todt={0}", date));
+                            mBuilder.Append(String.Format("&fromdt={0}Z&todt={1}Z", date.ToString("s"), date.AddDays(1).ToString("s")));
 
                             break;
 
                         case ExpressionType.LessThan:
-                            mBuilder.Append(String.Format("&todt={0}", date));
+                            mBuilder.Append(String.Format("&todt={0}Z", date.ToString("s")));
 
                             break;
 
                         case ExpressionType.LessThanOrEqual:
                             date = date.AddDays(1);
 
-                            mBuilder.Append(String.Format("&todt={0}", date));
+                            mBuilder.Append(String.Format("&todt={0}Z", date.ToString("s")));
 
                             break;
 
                         case ExpressionType.GreaterThan:
-                            mBuilder.Append(String.Format("&fromdt={0}", date));
+                            mBuilder.Append(String.Format("&fromdt={0}Z", date.ToString("s")));
 
                             break;
 
                         case ExpressionType.GreaterThanOrEqual:
                             date = date.AddDays(-1);
 
-                            mBuilder.Append(String.Format("&fromdt={0}", date));
+                            mBuilder.Append(String.Format("&fromdt={0}Z", date.ToString("s")));
 
                             break;
 

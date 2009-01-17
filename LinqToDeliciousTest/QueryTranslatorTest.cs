@@ -82,8 +82,8 @@ namespace LinqToDeliciousTest
 
             Debug.WriteLine("url: " + url);
 
-            Assert.IsTrue(url.Contains("fromdt=1/1/2008 12:00:00 AM"));
-            Assert.IsTrue(url.Contains("todt=1/1/2008 12:00:00 AM"));
+            Assert.IsTrue(url.Contains("fromdt=2008-01-01T00:00:00Z"));
+            Assert.IsTrue(url.Contains("todt=2008-01-02T00:00:00Z"));
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace LinqToDeliciousTest
 
             Debug.WriteLine("url: " + url);
 
-            Assert.IsTrue(url.Contains("todt=1/1/2008 12:00:00 AM"));
+            Assert.IsTrue(url.Contains("todt=2008-01-01T00:00:00Z"));
             Assert.IsFalse(url.Contains("fromdt="));
         }
 
@@ -118,7 +118,7 @@ namespace LinqToDeliciousTest
 
             Debug.WriteLine("url: " + url);
 
-            Assert.IsTrue(url.Contains("todt=1/2/2008 12:00:00 AM"));
+            Assert.IsTrue(url.Contains("todt=2008-01-02T00:00:00Z"));
             Assert.IsFalse(url.Contains("fromdt="));
         }
 
@@ -136,7 +136,7 @@ namespace LinqToDeliciousTest
 
             Debug.WriteLine("url: " + url);
 
-            Assert.IsTrue(url.Contains("fromdt=1/1/2008 12:00:00 AM"));
+            Assert.IsTrue(url.Contains("fromdt=2008-01-01T00:00:00Z"));
             Assert.IsFalse(url.Contains("todt="));
         }
 
@@ -153,8 +153,8 @@ namespace LinqToDeliciousTest
             string url = TranslateQuery(mParam, dateClause);
 
             Debug.WriteLine("url: " + url);
-            
-            Assert.IsTrue(url.Contains("fromdt=12/31/2007 12:00:00 AM"));
+
+            Assert.IsTrue(url.Contains("fromdt=2007-12-31T00:00:00Z"));
             Assert.IsFalse(url.Contains("todt="));
         }
 
@@ -193,7 +193,7 @@ namespace LinqToDeliciousTest
             Debug.WriteLine("url: " + url);
 
             Assert.IsTrue(url.Contains("tag=example"));
-            Assert.IsTrue(url.Contains("fromdt=1/1/2008 12:00:00 AM"));
+            Assert.IsTrue(url.Contains("fromdt=2008-01-01T00:00:00Z"));
             Assert.IsFalse(url.Contains("todt="));
         }
 
@@ -216,8 +216,8 @@ namespace LinqToDeliciousTest
 
             Assert.IsTrue(url.Contains("tag=example"));
 
-            Assert.IsTrue(url.Contains("fromdt=1/1/2008 12:00:00 AM"));
-            Assert.IsTrue(url.Contains("todt=1/1/2008 12:00:00 AM"));
+            Assert.IsTrue(url.Contains("fromdt=2008-01-01T00:00:00Z"));
+            Assert.IsTrue(url.Contains("todt=2008-01-02T00:00:00Z"));
         }
 
         /// <summary>
