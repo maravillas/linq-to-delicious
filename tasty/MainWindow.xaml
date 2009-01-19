@@ -1,0 +1,23 @@
+﻿<Window x:Class="tasty.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:src="clr-namespace:tasty.Commands"
+    Title="Tasty" Height="404" Width="715">
+    
+    <Window.CommandBindings>
+        <CommandBinding Command="src:FileCommands.Exit" Executed="Exit_Executed" CanExecute="Exit_CanExecute"/>
+    </Window.CommandBindings>
+    <Grid>
+        <StatusBar Height="23" Name="statusBar" VerticalAlignment="Bottom" />
+        <Menu Height="22" Name="menu1" VerticalAlignment="Top">
+            <MenuItem Header="_File">
+                <MenuItem Command="src:FileCommands.Exit"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Command="Cut" Header="Cu_t" />
+                <MenuItem Command="Copy" Header="_Copy" />
+                <MenuItem Command="Paste" Header="_Paste" IsEnabled="True" />
+            </MenuItem>
+        </Menu>
+    </Grid>
+</Window>

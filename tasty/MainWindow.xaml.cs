@@ -20,20 +20,35 @@ namespace tasty
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class Window1 : Window
+    public partial class MainWindow : Window
     {
-        public Window1()
+        public IEnumerable<Post> Posts { get; private set; }
+
+        public MainWindow()
         {
             InitializeComponent();
+            
+            Posts = new List<Post>();
 
+            /*
             var query = from post in new Delicious("username", "password").Posts
-                        where post.Date == new DateTime(2008, 1, 1)
+                        where post.Date == new DateTime(2009, 1, 16)
                         select post;
 
             foreach (var p in query)
             {
                 Debug.WriteLine(p);
-            }
+            }*/
+        }
+
+        private void Exit_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Exit_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
         }
     }
 }
